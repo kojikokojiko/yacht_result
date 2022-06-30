@@ -15,4 +15,8 @@ class TempRankNotifier extends StateNotifier<List<int>> {
     state=[...state,value];
   }
 
+  void rmRank(int value){
+    state=[...state,value];
+  }
+
 }
