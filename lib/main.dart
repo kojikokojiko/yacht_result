@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yacht_result/view/regataname_page.dart';
 import 'package:yacht_result/view/stt_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 void main() async{
@@ -20,7 +21,8 @@ class MyApp extends StatelessWidget {
 
         primarySwatch: Colors.blue,
       ),
-      home:  SttPage(),
+      home:  RegattaNamePage()
+      // SttPage(),
     );
   }
 }

@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yacht_result/view/rank_controller.dart';
-import 'package:flutter/cupertino.dart';
-import "package:flutter/material.dart";
+
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:yacht_result/view/rank_controller.dart';
+
 import 'package:yacht_result/view/stt_page_vm.dart';
 
 import 'package:flutter_slidable/flutter_slidable.dart';
-
-import 'component/sttwidget.dart';
 
 class SttPage extends HookConsumerWidget {
   SttPage({Key? key}) : super(key: key);
@@ -23,11 +19,10 @@ class SttPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rankListController = ref.read(rankListProvider.notifier);
 
-
     final tempResultController = ref.read(tempRankProvider.notifier);
     final tempResultState = ref.watch(tempRankProvider);
 
-
+    final raceNum = useState(1);
     final lastWords = useState("");
     final lastError = useState("");
     final lastStatus = useState("");
@@ -56,9 +51,43 @@ class SttPage extends HookConsumerWidget {
         print("The user has denied the use of speech recognition.");
       }
     }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("着順入力"),
+        title: Container(
+          child: Row(
+            children: [
+              Text("着順入力"),
+
+              // DropdownButton<int>(
+              //   dropdownColor: Colors.grey,
+              //   value: raceNum.value,
+              //   icon: const Icon(Icons.arrow_downward,
+              //     color: Colors.white,
+              //   ),
+              //   elevation: 16,
+              //   style: const TextStyle(color: Colors.white),
+              //   underline: Container(
+              //     height: 2,
+              //     color: Colors.white,
+              //   ),
+              //   onChanged: (int? newValue) {
+              //     raceNum.value=newValue!;
+              //
+              //   },
+              //   items: <int>[1, 2, 3, 4,5,6,7,8,9]
+              //       .map<DropdownMenuItem<int>>((int value) {
+              //     return DropdownMenuItem<int>(
+              //
+              //       value: value,
+              //       child: Container(
+              //           child: Text(value.toString())),
+              //     );
+              //   }).toList(),
+              // ),
+            ],
+          ),
+        ),
         centerTitle: true,
         actions: [
           Container(
@@ -85,13 +114,45 @@ class SttPage extends HookConsumerWidget {
           )
         ],
       ),
-      body:  Container(
+      body: Container(
         margin: const EdgeInsets.all(10),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             // crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("レース番号を選択"),
+                  TextButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) {
+                            return SimpleDialog(
+                              title: const Text('レース番号を選択'),
+                              children: <Widget>[
+                                for (int i = 1; i < 9; i++)
+                                  SimpleDialogOption(
+                                    child: Text('第$iレ―ス'),
+                                    onPressed: () {
+                                      // raceNum.value=i;
+                                      tempResultController.updateRaceNumber(i);
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                              ],
+                            );
+                          });
+                    },
+                    child: Text(tempResultState.raceNum.toString(),
+                    style:,
+                    ),
+                  ),
+                ],
+              ),
               Text(
                 '艇番:${lastWords.value}',
                 style: Theme.of(context).textTheme.headline4,
@@ -125,7 +186,7 @@ class SttPage extends HookConsumerWidget {
                                         builder: (context) {
                                           return Column(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                                MainAxisAlignment.center,
                                             children: [
                                               AlertDialog(
                                                 title: const Text("順位を編集"),
@@ -136,9 +197,13 @@ class SttPage extends HookConsumerWidget {
                                                     child: GridView.count(
                                                       crossAxisCount: 3,
                                                       children: [
-                                                        for (var i=0 ;i<9;i++)
-                                                          Card(color: Colors.red,child: Text("$i"),)
-
+                                                        for (var i = 0;
+                                                            i < 9;
+                                                            i++)
+                                                          Card(
+                                                            color: Colors.red,
+                                                            child: Text("$i"),
+                                                          )
 
                                                         // Card(
                                                         //   color: Colors.red,
@@ -156,14 +221,14 @@ class SttPage extends HookConsumerWidget {
                                                 actions: [
                                                   TextButton(
                                                     child: const Text("Cancel"),
-                                                    onPressed: () => Navigator.pop(context),
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
                                                   ),
                                                   TextButton(
                                                     child: const Text("OK"),
-                                                    onPressed: () => Navigator.pop(context),
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
                                                   ),
-
-
                                                 ],
                                               ),
                                             ],
@@ -223,7 +288,8 @@ class SttPage extends HookConsumerWidget {
                     ),
                     onPressed: () {
                       try {
-                        tempResultController.addRank(int.parse(lastWords.value));
+                        tempResultController
+                            .addRank(int.parse(lastWords.value));
                         print(tempResultState);
                       } catch (exception) {
                         // print("fdfd $exception");

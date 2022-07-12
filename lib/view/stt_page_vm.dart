@@ -46,4 +46,12 @@ class TempRankNotifier extends StateNotifier<TempRankData> {
     final ranks=[...state.ranks.sublist(0,index),value,...state.ranks.sublist(index+1,state.ranks.length)];
     state=state.copyWith(ranks:ranks);
   }
+
+  void updateRegattaName(String value){
+    state=state.copyWith(raceName: value);
+  }
+
+  void updateRaceNumber(int value){
+    state=state.copyWith(raceNum: value);
+  }
 }
