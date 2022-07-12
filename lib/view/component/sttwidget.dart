@@ -1,10 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:yacht_result/view/stv_page_vm.dart';
+import 'package:yacht_result/view/rank_controller.dart';
+import 'package:yacht_result/view/stt_page_vm.dart';
 
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -17,6 +19,8 @@ class SttWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tempResultController = ref.read(tempRankProvider.notifier);
     final tempResultState = ref.watch(tempRankProvider);
+
+
     final lastWords = useState("");
     final lastError = useState("");
     final lastStatus = useState("");
@@ -25,15 +29,7 @@ class SttWidget extends HookConsumerWidget {
     }
 
     void resultListener(SpeechRecognitionResult result) {
-      // lastWords = '${result.recognizedWords}';
       lastWords.value = result.recognizedWords;
-      // tempResultController.addRank(int.parse(result.recognizedWords));
-      // 数字にできる文字列か判定
-
-      // // if(double.tryParse(result.recognizedWords)!=null){
-      // //   tempResultController..add(Math.parseInt(result.recognizedWords));
-      // //
-      // // }
     }
 
     void errorListener(SpeechRecognitionError error) {
@@ -41,7 +37,7 @@ class SttWidget extends HookConsumerWidget {
     }
 
     void statusListener(String status) {
-      lastStatus.value = '$status';
+      lastStatus.value = status;
     }
 
     Future<void> _speak() async {
@@ -55,7 +51,7 @@ class SttWidget extends HookConsumerWidget {
     }
 
     return Container(
-      margin: EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -69,47 +65,91 @@ class SttWidget extends HookConsumerWidget {
               'ステータス : ${lastStatus.value}',
               style: Theme.of(context).textTheme.headline4,
             ),
-
             Expanded(
               child: ListView.builder(
-                  itemCount: tempResultState.length,
+                  itemCount: tempResultState.ranks.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      // color: Colors.grey,
-                      child: Column(
-                        children: [
-                          Slidable(
-                            endActionPane: ActionPane(
-                              motion:DrawerMotion(),
-                              children: [
-                                SlidableAction(
-                                  onPressed: (_) {
-                                    // db.deleteData(item);
-                                  },
-                                  flex: 1,
-                                  icon: Icons.delete,
-                                ),
-                                SlidableAction(
-                                  onPressed: (_) {
-                                    // 編集
-
-                                  },
-                                  flex: 1,
-                                  icon: Icons.edit,
-                                ),
-                              ],
-                            ),
-
-                            child: ListTile(
-                              title: Text("${index+1}着 ${tempResultState[index]}",
-                                style: Theme.of(context).textTheme.headline5,
+                    return Column(
+                      children: [
+                        Slidable(
+                          endActionPane: ActionPane(
+                            motion: const DrawerMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (_) {
+                                  tempResultController.rmSelectedRank(index);
+                                },
+                                flex: 1,
+                                icon: Icons.delete,
                               ),
+                              SlidableAction(
+                                onPressed: (_) {
+                                  // 編集
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            AlertDialog(
+                                              title: const Text("順位を編集"),
+                                              content: SingleChildScrollView(
+                                                child: SizedBox(
+                                                  height: 300,
+                                                  width: 150,
+                                                  child: GridView.count(
+                                                    crossAxisCount: 3,
+                                                    children: [
+                                                      for (var i=0 ;i<9;i++)
+                                                        Card(color: Colors.red,child: Text("$i"),)
 
+
+                                                      // Card(
+                                                      //   color: Colors.red,
+                                                      // ),
+                                                      // Card(
+                                                      //   color: Colors.red,
+                                                      // ),
+                                                      // Card(
+                                                      //   color: Colors.red,
+                                                      // )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  child: const Text("Cancel"),
+                                                  onPressed: () => Navigator.pop(context),
+                                                ),
+                                                TextButton(
+                                                  child: const Text("OK"),
+                                                  onPressed: () => Navigator.pop(context),
+                                                ),
+
+
+                                              ],
+                                            ),
+                                          ],
+                                        );
+                                      });
+                                  tempResultController.editRank(index, 0351);
+                                },
+                                flex: 1,
+                                icon: Icons.edit,
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              "${index + 1}着 ${tempResultState.ranks[index]}",
+                              style: Theme.of(context).textTheme.headline5,
                             ),
                           ),
-                          Divider(),
-                        ],
-                      ),
+                        ),
+                        const Divider(),
+                      ],
                     );
                   }),
             ),
@@ -117,7 +157,6 @@ class SttWidget extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  child: const Text('speak'),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.blue,
                     onPrimary: Colors.black,
@@ -126,9 +165,9 @@ class SttWidget extends HookConsumerWidget {
                     ),
                   ),
                   onPressed: _speak,
+                  child: const Text('speak'),
                 ),
                 ElevatedButton(
-                  child: const Text('stop'),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.blue,
                     onPrimary: Colors.black,
@@ -137,27 +176,27 @@ class SttWidget extends HookConsumerWidget {
                     ),
                   ),
                   onPressed: _stop,
+                  child: const Text('stop'),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                    onPrimary: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    try {
+                      tempResultController.addRank(int.parse(lastWords.value));
+                      print(tempResultState);
+                    } catch (exception) {
+                      // print("fdfd $exception");
+                    }
+                  },
                   child: const Text('確定'),
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.blue,
-                    onPrimary: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    try {
-                      tempResultController.addRank(int.parse(lastWords.value));
-                      print(tempResultState);
-                    } catch (exception) {
-                      print("fdfd $exception");
-                    }
-                  },
                 ),
                 ElevatedButton(
-                  child: const Text('削除'),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.blue,
                     onPrimary: Colors.black,
@@ -167,12 +206,13 @@ class SttWidget extends HookConsumerWidget {
                   ),
                   onPressed: () {
                     try {
-                      tempResultController.addRank(int.parse(lastWords.value));
+                      tempResultController.rmLastRank();
                       print(tempResultState);
                     } catch (exception) {
                       print("fdfd $exception");
                     }
                   },
+                  child: const Text('削除'),
                 ),
               ],
             ),
