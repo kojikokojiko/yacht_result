@@ -124,7 +124,7 @@ class SttPage extends HookConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("レース番号を選択"),
+                  const Text("レース番号"),
                   TextButton(
                     onPressed: () {
                       showDialog(
@@ -147,8 +147,13 @@ class SttPage extends HookConsumerWidget {
                             );
                           });
                     },
-                    child: Text(tempResultState.raceNum.toString(),
-                    style:,
+                    child: Text(
+                      tempResultState.raceNum.toString(),
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: (tempResultState.raceNum == 0)
+                              ? Colors.red
+                              : Colors.blue),
                     ),
                   ),
                 ],
