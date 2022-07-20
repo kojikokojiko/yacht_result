@@ -25,8 +25,13 @@ class RankController extends StateNotifier<AsyncValue<List<TempRankData>>>{
 
   void setRank(TempRankData rankData){
     _repo.saveRankData(rankData);
-
   }
+
+  Stream<List<TempRankData>> getReggtaSnapshots() {
+    return _repo.getReggtaSnapshots();
+  }
+
+
 
 
 }

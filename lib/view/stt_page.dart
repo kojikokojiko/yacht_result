@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:yacht_result/view/resultpage.dart';
 
 import 'package:yacht_result/view/stt_page_vm.dart';
 
@@ -60,32 +61,6 @@ class SttPage extends HookConsumerWidget {
             children: [
               Text("着順入力"),
 
-              // DropdownButton<int>(
-              //   dropdownColor: Colors.grey,
-              //   value: raceNum.value,
-              //   icon: const Icon(Icons.arrow_downward,
-              //     color: Colors.white,
-              //   ),
-              //   elevation: 16,
-              //   style: const TextStyle(color: Colors.white),
-              //   underline: Container(
-              //     height: 2,
-              //     color: Colors.white,
-              //   ),
-              //   onChanged: (int? newValue) {
-              //     raceNum.value=newValue!;
-              //
-              //   },
-              //   items: <int>[1, 2, 3, 4,5,6,7,8,9]
-              //       .map<DropdownMenuItem<int>>((int value) {
-              //     return DropdownMenuItem<int>(
-              //
-              //       value: value,
-              //       child: Container(
-              //           child: Text(value.toString())),
-              //     );
-              //   }).toList(),
-              // ),
             ],
           ),
         ),
