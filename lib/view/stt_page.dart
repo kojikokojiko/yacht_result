@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:yacht_result/view/rank_controller.dart';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -97,6 +98,8 @@ class SttPage extends HookConsumerWidget {
             child: ElevatedButton(
               onPressed: () {
                 rankListController.setRank(tempResultState);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ResultPage()));
               },
               style: OutlinedButton.styleFrom(
                 backgroundColor: Colors.grey[300],
@@ -160,103 +163,69 @@ class SttPage extends HookConsumerWidget {
               ),
               Text(
                 '艇番:${lastWords.value}',
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .headline4,
               ),
               Text(
                 'ステータス : ${lastStatus.value}',
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .headline4,
               ),
               Expanded(
                 child: ListView.builder(
-                    itemCount: tempResultState.ranks.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Column(
-                        children: [
-                          Slidable(
-                            endActionPane: ActionPane(
-                              motion: const DrawerMotion(),
-                              children: [
-                                SlidableAction(
-                                  onPressed: (_) {
-                                    tempResultController.rmSelectedRank(index);
-                                  },
-                                  flex: 1,
-                                  icon: Icons.delete,
-                                ),
-                                SlidableAction(
-                                  onPressed: (_) {
-                                    // 編集
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              AlertDialog(
-                                                title: const Text("順位を編集"),
-                                                content: SingleChildScrollView(
-                                                  child: SizedBox(
-                                                    height: 300,
-                                                    width: 150,
-                                                    child: GridView.count(
-                                                      crossAxisCount: 3,
-                                                      children: [
-                                                        for (var i = 0;
-                                                            i < 9;
-                                                            i++)
-                                                          Card(
-                                                            color: Colors.red,
-                                                            child: Text("$i"),
-                                                          )
-
-                                                        // Card(
-                                                        //   color: Colors.red,
-                                                        // ),
-                                                        // Card(
-                                                        //   color: Colors.red,
-                                                        // ),
-                                                        // Card(
-                                                        //   color: Colors.red,
-                                                        // )
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    child: const Text("Cancel"),
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                  ),
-                                                  TextButton(
-                                                    child: const Text("OK"),
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          );
-                                        });
-                                    tempResultController.editRank(index, 0351);
-                                  },
-                                  flex: 1,
-                                  icon: Icons.edit,
-                                ),
-                              ],
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                "${index + 1}着 ${tempResultState.ranks[index]}",
-                                style: Theme.of(context).textTheme.headline5,
+                  itemCount: tempResultState.ranks.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Column(
+                      children: [
+                        Slidable(
+                          endActionPane: ActionPane(
+                            motion: const DrawerMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (_) {
+                                  tempResultController.rmSelectedRank(index);
+                                },
+                                flex: 1,
+                                icon: Icons.delete,
                               ),
+                              SlidableAction(
+                                onPressed: (_) {
+                                  // 編集
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      // final sfd="dfdf";
+                                      // final temp_edit_num=useState(tempResultState.ranks[index]);
+                                      return ModalEditPage(
+                                        prevNum: tempResultState.ranks[index],
+                                        ranksIndex: index,
+                                      );
+                                    },
+                                  );
+                                },
+                                flex: 1,
+                                icon: Icons.edit,
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              "${index + 1}着 ${tempResultState.ranks[index]}",
+                              style: Theme
+                                  .of(context)
+                                  .textTheme
+                                  .headline5,
                             ),
                           ),
-                          const Divider(),
-                        ],
-                      );
-                    }),
+                        ),
+                        const Divider(),
+                      ],
+                    );
+                  },),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -326,6 +295,58 @@ class SttPage extends HookConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ModalEditPage extends HookConsumerWidget {
+  const ModalEditPage({
+    Key? key,
+    required this.prevNum,
+    required this.ranksIndex,
+  }) : super(key: key);
+
+  // final ValueNotifier<int> temp_edit_num;
+  final prevNum;
+  final ranksIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tempEditNum = useState(prevNum);
+    final tempResultController = ref.read(tempRankProvider.notifier);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AlertDialog(
+          title: const Text("順位を編集"),
+          content: Column(
+            children: [
+              Text(tempEditNum.value.toString()),
+              TextField(
+                  onChanged: (value) {
+                    tempEditNum.value = int.parse(value);
+                  },
+                  onSubmitted: (value) {
+                    tempEditNum.value = int.parse(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly])
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+                child: const Text("OK"),
+                onPressed: () {
+                  tempResultController.editRank(ranksIndex, tempEditNum.value);
+                  Navigator.pop(context);
+                }),
+          ],
+        ),
+      ],
     );
   }
 }
