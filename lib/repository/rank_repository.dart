@@ -3,21 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yacht_result/model/temp_rank_model.dart';
 
 
-final rankRepositoryProvider = Provider((ref) => RankRepository());
+final rankRepositoryProvider = Provider.family<RankRepository,String>((ref,raceName) => RankRepository(raceName: raceName));
 
 
 
 class RankRepository {
-  final CollectionReference _collection =
-      FirebaseFirestore.instance.collection("collection_ranks");
+  String raceName;
+  RankRepository({required this.raceName});
 
   void saveRankData(TempRankData rankData) {
-    _collection.add(rankData.toJson());
+    final CollectionReference collection =
+    FirebaseFirestore.instance.collection(raceName);
+
+    collection.add(rankData.toJson());
   }
 
   Stream<List<TempRankData>> getSnapshots() {
-    return _collection
-    // .where("raceName",isEqualTo: "なひ")
+    final CollectionReference collection =
+    FirebaseFirestore.instance.collection(raceName);
+
+    return collection
+    .where("raceName",isEqualTo: "なひ")
         .orderBy('raceNum', descending: false)
         .limit(10)
         .snapshots()
@@ -27,9 +33,14 @@ class RankRepository {
             .toList());
   }
 
+
+
   Stream<List<TempRankData>> getReggtaSnapshots() {
-    final result=_collection
-        .where("raceName",isEqualTo: "なひ")
+    final CollectionReference collection =
+    FirebaseFirestore.instance.collection(raceName);
+
+    final result=collection
+        .where("raceName",isEqualTo: "なかしましゅんすけ")
         .orderBy('raceNum', descending: false)
         .limit(20)
         .snapshots()

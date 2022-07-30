@@ -6,13 +6,14 @@ import '../model/temp_rank_model.dart';
 import '../repository/rank_repository.dart';
 
 
-final _currentInternDataProvider=StreamProvider((ref)=>
-    ref.read(rankRepositoryProvider).getSnapshots()
+final _currentInternDataProvider=StreamProvider.family<List<TempRankData>,String>((ref,raceName)=>
+    ref.read(rankRepositoryProvider(raceName)).getSnapshots()
 );
 
-final rankListProvider=StateNotifierProvider<RankController,AsyncValue<List<TempRankData>>>((ref){
-  final repo=ref.read(rankRepositoryProvider);
-  final currentList=ref.watch(_currentInternDataProvider);
+final rankListProvider=StateNotifierProvider.family<RankController,AsyncValue<List<TempRankData>>,String>((ref,raceName){
+
+  final repo=ref.read(rankRepositoryProvider(raceName));
+  final currentList=ref.watch(_currentInternDataProvider(raceName));
   return RankController(repo,currentList);
 });
 
@@ -22,9 +23,14 @@ class RankController extends StateNotifier<AsyncValue<List<TempRankData>>>{
   final RankRepository _repo;
 
 
+  // AsyncValue<List<TempRankData>> get getReggata => AsyncValue.data(state.value==null ? [] :state.value!.where((element) => element.raceName==).toList());
 
   void setRank(TempRankData rankData){
     _repo.saveRankData(rankData);
+  }
+
+  Stream<List<TempRankData>> getSnapshots() {
+    return _repo.getSnapshots();
   }
 
   Stream<List<TempRankData>> getReggtaSnapshots() {

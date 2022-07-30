@@ -11,10 +11,11 @@ class ResultPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rankListController = ref.read(rankListProvider.notifier);
-
     final tempResultController = ref.read(tempRankProvider.notifier);
     final tempResultState = ref.read(tempRankProvider);
+    final rankListController = ref.read(rankListProvider(tempResultState.raceName).notifier);
+
+
     return Scaffold(
       appBar: AppBar(
         title: Container(

@@ -19,10 +19,11 @@ class SttPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rankListController = ref.read(rankListProvider.notifier);
 
     final tempResultController = ref.read(tempRankProvider.notifier);
     final tempResultState = ref.watch(tempRankProvider);
+
+    final rankListController = ref.read(rankListProvider(tempResultState.raceName).notifier);
 
     final raceNum = useState(1);
     final lastWords = useState("");
