@@ -1,13 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yacht_result/view/rank_controller.dart';
 import 'package:yacht_result/view/regataname_page.dart';
 import 'package:yacht_result/view/sign_in_screen.dart';
+import 'package:yacht_result/view/stt_page_vm.dart';
 
+import '../model/temp_rank_model.dart';
 import '../utils/authentication.dart';
 import 'component/user_info_appbar.dart';
 
-class UserInfoScreen extends StatefulWidget {
+class UserInfoScreen extends ConsumerStatefulWidget {
   const UserInfoScreen({Key? key, required User user})
       : _user = user,
         super(key: key);
@@ -18,7 +22,7 @@ class UserInfoScreen extends StatefulWidget {
   _UserInfoScreenState createState() => _UserInfoScreenState();
 }
 
-class _UserInfoScreenState extends State<UserInfoScreen> {
+class _UserInfoScreenState extends ConsumerState<UserInfoScreen> {
   late User _user;
   bool _isSigningOut = false;
 
@@ -55,7 +59,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
       appBar: AppBar(
         elevation: 0,
         // backgroundColor: CustomColors.firebaseNavy,
-        title:Text("YachtResult"),
+        title: Text("YachtResult"),
       ),
       body: SafeArea(
         child: Padding(
@@ -64,7 +68,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             right: 16.0,
             bottom: 20.0,
           ),
-          child: SingleChildScrollView(
+          child: Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -119,30 +123,59 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                   ),
                 ),
                 const SizedBox(height: 24.0),
-                StreamBuilder(
-                  stream: rankListController.getReggtaSnapshots(),
-                  builder: ((BuildContext context,
-                      AsyncSnapshot<List<TempRankData>> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    return (snapshot.data?.isEmpty??true)
-                        ? const Center(child: Text("記録がありません"))
-                        : Expanded(
-                      child: ListView.builder(
-                        //11
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) {
-                            return Card(
-                              child: ListTile(
-                                leading: Text(
-                                    snapshot.data![index].raceNum.toString()),
-                              ),
-                            );
-                          }),
-                    );
-                  }),
-                )
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                      Colors.blueAccent,
+                    ),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const RegattaNamePage()));
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                    child: Text(
+                      '結果入力',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ),
+                ),
+                // StreamBuilder(
+                //   stream: rankListController.getReggtaSnapshots(),
+                //   builder: ((BuildContext context,
+                //       AsyncSnapshot<List<TempRankData>> snapshot) {
+                //     if (snapshot.connectionState == ConnectionState.waiting) {
+                //       return const Center(child: CircularProgressIndicator());
+                //     }
+                //     return (snapshot.data?.isEmpty ?? true)
+                //         ? const Center(child: Text("記録がありません"))
+                //         : Expanded(
+                //             child: ListView.builder(
+                //                 //11
+                //                 itemCount: snapshot.data!.length,
+                //                 itemBuilder: (context, index) {
+                //                   return Card(
+                //                     child: ListTile(
+                //                       leading: Text(snapshot
+                //                           .data![index].raceNum
+                //                           .toString()),
+                //                     ),
+                //                   );
+                //                 }),
+                //           );
+                //   }),
+                // ),
                 const SizedBox(height: 16.0),
                 _isSigningOut
                     ? const CircularProgressIndicator(

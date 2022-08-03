@@ -1,29 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yacht_result/model/temp_rank_model.dart';
 
 
-final rankRepositoryProvider = Provider.family<RankRepository,String>((ref,raceName) => RankRepository(raceName: raceName));
+final rankRepositoryProvider = Provider((ref) => RankRepository());
 
 
 
 class RankRepository {
-  String raceName;
-  RankRepository({required this.raceName});
+  final myId=FirebaseAuth.instance.currentUser!.uid;
+  final CollectionReference collection =
+  FirebaseFirestore.instance.collection("user");
 
-  void saveRankData(TempRankData rankData) {
-    final CollectionReference collection =
-    FirebaseFirestore.instance.collection(raceName);
 
-    collection.add(rankData.toJson());
+
+  void saveRankData(TempRankData rankData,String raceName) {
+    final myId = FirebaseAuth.instance.currentUser!.uid;
+
+    collection.doc(myId).collection(raceName).doc(rankData.raceNum.toString()).set(rankData.toJson());
   }
 
-  Stream<List<TempRankData>> getSnapshots() {
-    final CollectionReference collection =
-    FirebaseFirestore.instance.collection(raceName);
+  void updateRankData(TempRankData rankData,String raceName) {
+    final myId = FirebaseAuth.instance.currentUser!.uid;
 
-    return collection
-    .where("raceName",isEqualTo: "なひ")
+    collection.doc(myId).collection(raceName).doc(rankData.raceNum.toString()).update(rankData.toJson());
+  }
+
+
+  Stream<List<TempRankData>> getReggataSnapshots(String raceName) {
+    final myId = FirebaseAuth.instance.currentUser!.uid;
+
+    return collection.doc(myId).collection(raceName)
         .orderBy('raceNum', descending: false)
         .limit(10)
         .snapshots()
@@ -35,19 +43,17 @@ class RankRepository {
 
 
 
-  Stream<List<TempRankData>> getReggtaSnapshots() {
-    final CollectionReference collection =
-    FirebaseFirestore.instance.collection(raceName);
-
-    final result=collection
-        .where("raceName",isEqualTo: "なかしましゅんすけ")
-        .orderBy('raceNum', descending: false)
-        .limit(20)
-        .snapshots()
-        .map((e) => e.docs
-        .map((data) =>
-        TempRankData.fromJson(data.data() as Map<String, dynamic>))
-        .toList());
-    return result;
-  }
+  // Stream<List<TempRankData>> getReggataSnapshots() {
+  //
+  //   final result=collection
+  //       .where("raceName",isEqualTo: "なかしましゅんすけ")
+  //       .orderBy('raceNum', descending: false)
+  //       .limit(20)
+  //       .snapshots()
+  //       .map((e) => e.docs
+  //       .map((data) =>
+  //       TempRankData.fromJson(data.data() as Map<String, dynamic>))
+  //       .toList());
+  //   return result;
+  // }
 }

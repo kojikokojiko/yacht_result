@@ -39,6 +39,7 @@ class TempRankNotifier extends StateNotifier<TempRankData> {
 
     final ranks=List.of(state.ranks)..removeAt(index);
     state=state.copyWith(ranks:ranks);
+
   }
 
   void editRank(int index,int value){

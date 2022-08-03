@@ -13,8 +13,8 @@ class ResultPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tempResultController = ref.read(tempRankProvider.notifier);
     final tempResultState = ref.read(tempRankProvider);
-    final rankListController = ref.read(rankListProvider(tempResultState.raceName).notifier);
-
+    final raceName = tempResultState.raceName;
+    final rankListController = ref.read(rankListProvider(raceName).notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,33 +28,37 @@ class ResultPage extends ConsumerWidget {
         centerTitle: true,
       ),
       body: Container(
-        margin: EdgeInsets.all(10),
+        margin: const EdgeInsets.all(10),
         child: Column(
           children: [
             Center(
               child: Text(
                 tempResultState.raceName,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+            Text(rankListController.getResultSum(raceName).toString()),
             StreamBuilder(
-              stream: rankListController.getReggtaSnapshots(),
+              stream: rankListController.getReggtaSnapshots(raceName),
               builder: ((BuildContext context,
                   AsyncSnapshot<List<TempRankData>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return (snapshot.data?.isEmpty??true)
+                return (snapshot.data?.isEmpty ?? true)
                     ? const Center(child: Text("記録がありません"))
                     : Expanded(
                         child: ListView.builder(
                             //11
                             itemCount: snapshot.data!.length,
                             itemBuilder: (context, index) {
+                              final rank=snapshot.data![index].raceNum;
                               return Card(
                                 child: ListTile(
                                   leading: Text(
-                                      snapshot.data![index].raceNum.toString()),
+                                      '${snapshot.data![index].raceNum.toString()}レース目結果'),
+
                                 ),
                               );
                             }),

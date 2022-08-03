@@ -22,8 +22,8 @@ class SttPage extends HookConsumerWidget {
 
     final tempResultController = ref.read(tempRankProvider.notifier);
     final tempResultState = ref.watch(tempRankProvider);
-
-    final rankListController = ref.read(rankListProvider(tempResultState.raceName).notifier);
+    final raceName=tempResultState.raceName;
+    final rankListController = ref.read(rankListProvider(raceName).notifier);
 
     final raceNum = useState(1);
     final lastWords = useState("");
@@ -57,13 +57,11 @@ class SttPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          child: Row(
-            children: [
-              Text("着順入力"),
+        title: Row(
+          children: const [
+            Text("着順入力"),
 
-            ],
-          ),
+          ],
         ),
         centerTitle: true,
         actions: [
@@ -73,7 +71,7 @@ class SttPage extends HookConsumerWidget {
             height: 20,
             child: ElevatedButton(
               onPressed: () {
-                rankListController.setRank(tempResultState);
+                rankListController.setRank(tempResultState,raceName);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => ResultPage()));
               },
@@ -258,9 +256,9 @@ class SttPage extends HookConsumerWidget {
                     onPressed: () {
                       try {
                         tempResultController.rmLastRank();
-                        print(tempResultState);
+                        // print(tempResultState);
                       } catch (exception) {
-                        print("fdfd $exception");
+                        // print("fdfd $exception");
                       }
                     },
                     child: const Text('削除'),

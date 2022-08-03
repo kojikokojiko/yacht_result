@@ -19,4 +19,3 @@ class TempRankData with _$TempRankData {
 }
 
 // flutter pub run build_runner build --delete-conflicting-outputs
-//
